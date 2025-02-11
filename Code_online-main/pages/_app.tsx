@@ -3,21 +3,20 @@ import type { AppProps } from "next/app";
 import { Toaster } from "react-hot-toast";
 import { GlobalContext } from "../contexts/Globalcontext";
 import { useState } from "react";
-import { ConfigProvider } from "react-avatar";
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const [name, setName] = useState("")
-  return (
+  const [name, setName] = useState("");
 
-    <GlobalContext.Provider value={{name, setName}}>
+  return (
+    <GlobalContext.Provider value={{ name, setName }}>
       <Toaster
         position="top-right"
         toastOptions={{
           success: {
             duration: 3000,
-            theme: {
-              primary: "#4aee88",
-              // secondary: "black",
+            iconTheme: {
+              primary: "#4aee88", // Changes toast icon color
+              secondary: "black", // Changes toast background color
             },
           },
         }}

@@ -10,7 +10,7 @@ export const initSocket = async () => {
         timeout : 10000,
         transports: ['websocket']
     }
-    return io("localhost:5000" as string, option)
+    return io("pure-courage-production.up.railway.app" as string, option)
 }
 
 
