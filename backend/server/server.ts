@@ -5,7 +5,7 @@ import { Server } from "socket.io";
 import { ACTIONS } from "./SocketActions";
 import os from "os";
 
-const cors = require('cors');
+const cors = require("cors");
 
 const userSocketMap: Record<string, string> = {};
 
@@ -29,14 +29,16 @@ const io = new Server(server, {
 });
 
 const corsOptions = {
-  origin: 'collaborative-coding-delta.vercel.app', // Replace with your Vercel app URL
+  origin: [
+    "https://collaborative-coding-delta.vercel.app",
+    "http://localhost:5173",
+  ], // Allow frontend & local dev
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
   optionsSuccessStatus: 204,
-}
+};
 
 app.use(cors(corsOptions));
-
 
 // Helper function to get all connected clients in a room
 function getAllConnectedClients(roomId: string) {
@@ -93,5 +95,7 @@ const HOST = "0.0.0.0";
 
 // ✅ Log Railway's public URL instead of local IP
 server.listen(PORT, HOST, () => {
-  console.log(`Server running on: https://pure-courage-production.up.railway.app`);
+  console.log(
+    `Server running on: https://pure-courage-production.up.railway.app`
+  );
 });
