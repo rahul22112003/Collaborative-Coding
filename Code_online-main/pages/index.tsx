@@ -41,7 +41,7 @@ const Home: NextPage = () => {
         </div>
       </div>
 
-      <footer className="fixed bottom-2">
+      {/* <footer className="fixed bottom-2">
               {" "}
         <a
           className="text-primary ml-2 font-bold"
@@ -50,7 +50,7 @@ const Home: NextPage = () => {
           {" "}
           Vikram and Tushar
         </a>
-      </footer>
+      </footer> */}
     </div>
   );
 };

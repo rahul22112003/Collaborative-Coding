@@ -12,9 +12,11 @@ import { useGlobalContext } from "../../contexts/Globalcontext";
 import { dummyFilesData } from "../../helpers/data";
 import { initSocket } from "../../helpers/socket";
 import { ACTIONS } from "../../helpers/SocketActions";
-interface EditorProps {}
+import Peer, { MediaConnection } from "peerjs";
 
-const EditorContainer: React.FC<EditorProps> = ({}) => {
+interface EditorProps { }
+
+const EditorContainer: React.FC<EditorProps> = ({ }) => {
   const [html, setHtml] = useState("<h1>Hello World</h1>");
   const [css, setCss] = useState("");
   const [js, setJs] = useState("console.log('Hello world')");
@@ -28,6 +30,58 @@ const EditorContainer: React.FC<EditorProps> = ({}) => {
   const roomId = router.query.roomid;
   const { name } = useGlobalContext();
   const [clientList, setClients] = useState([]);
+  const [peers, setPeers] = useState<Record<string, MediaConnection>>({});
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const myPeer = new Peer();
+
+  const addAudioStream = (stream: MediaStream) => {
+    const audio = document.createElement("audio");
+    audio.srcObject = stream;
+    audio.autoplay = true;
+    document.body.appendChild(audio);
+  };
+
+  useEffect(() => {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((audioStream) => {
+      setStream(audioStream);
+      myPeer.on("call", (call) => {
+        call.answer(audioStream);
+        call.on("stream", (userStream) => {
+          addAudioStream(userStream);
+        });
+      });
+
+      socketRef.current?.on("user-connected", (userId) => {
+        const call = myPeer.call(userId, audioStream);
+        call.on("stream", (userStream) => {
+          addAudioStream(userStream);
+        });
+        setPeers((prev) => ({ ...prev, [userId]: call }));
+      });
+    });
+
+    socketRef.current?.on("user-disconnected", (userId) => {
+      if (peers[userId]) {
+        peers[userId].close();
+      }
+    });
+
+    return () => {
+      stream?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
+
+  const [isMuted, setIsMuted] = useState(false);
+
+  const toggleMute = () => {
+    if (!stream) return; // ✅ Ensure stream is not null before accessing
+    const audioTracks = stream.getAudioTracks();
+    if (audioTracks.length > 0) {
+      const newMuteState = !audioTracks[0].enabled;
+      audioTracks[0].enabled = newMuteState;
+      setIsMuted(!newMuteState);
+    }
+  };
 
   function joinEventhandler({ clients, username, socketId }: any) {
     setClients(clients);
@@ -239,8 +293,12 @@ const EditorContainer: React.FC<EditorProps> = ({}) => {
                   username={client.username}
                 />
               ))}
-              
+              <p></p>
             </div>
+            {/* Integrate voice chat here */}
+            <button onClick={toggleMute} className="p-2 bg-blue-500 text-white rounded">
+              {isMuted ? "Unmute" : "Mute"}
+            </button>
           </div>
           <div className="mx-3">
             <button
@@ -280,7 +338,7 @@ const EditorContainer: React.FC<EditorProps> = ({}) => {
               <ConsoleSection />
             </div>
           </div>
-          {}
+          { }
         </div>
       </div>
     </div>
