@@ -4,13 +4,34 @@ import http from "http";
 import { Server } from "socket.io";
 import { ACTIONS } from "./SocketActions";
 import os from "os";
+import { createServer } from "http";
 
-const cors = require("cors");
+const cors = require('cors');
 
 const userSocketMap: Record<string, string> = {};
 
 const app = express();
 const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+      origin: "*",
+      methods: ["GET", "POST"]
+  }
+});
+
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  socket.on("join-room", (roomId, userId) => {
+      socket.join(roomId);
+      socket.to(roomId).emit("user-connected", userId);
+
+      socket.on("disconnect", () => {
+          socket.to(roomId).emit("user-disconnected", userId);
+      });
+  });
+});
 
 // ✅ Enable CORS for Express
 // app.use(
@@ -21,28 +42,22 @@ const server = http.createServer(app);
 // );
 
 // ✅ Enable CORS for Socket.io
-const io = new Server(server, {
+const corsOptions = new Server(server, {
   cors: {
     origin: ["collaborative-coding-delta.vercel.app"], // Allow Vercel frontend & local dev
-    methods: ["GET", "POST"],
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true,
+  optionsSuccessStatus: 204,
   },
 });
 
-const corsOptions = {
-  origin: [
-    "https://collaborative-coding-delta.vercel.app",
-    "http://localhost:5173",
-  ], // Allow frontend & local dev
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true,
-  optionsSuccessStatus: 204,
-};
 
 app.use(cors(corsOptions));
 
+
 // Helper function to get all connected clients in a room
 function getAllConnectedClients(roomId: string) {
-  return Array.from(io.sockets.adapter.rooms.get(roomId) || []).map(
+  return Array.from(corsOptions.sockets.adapter.rooms.get(roomId) || []).map(
     (socketId) => ({
       socketId,
       username: userSocketMap[socketId],
@@ -51,7 +66,7 @@ function getAllConnectedClients(roomId: string) {
 }
 
 // Listen for socket connections
-io.on("connection", (socket) => {
+corsOptions.on("connection", (socket) => {
   console.log("Socket connected:", socket.id);
 
   socket.on(ACTIONS.JOIN, ({ roomId, username }) => {
@@ -60,7 +75,7 @@ io.on("connection", (socket) => {
     const clients = getAllConnectedClients(roomId);
 
     clients.forEach(({ socketId }) => {
-      io.to(socketId).emit(ACTIONS.JOINED, {
+      corsOptions.to(socketId).emit(ACTIONS.JOINED, {
         clients,
         username,
         socketId: socket.id,
@@ -73,7 +88,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on(ACTIONS.SYNC_CODE, ({ socketId, html, css, js }) => {
-    io.to(socketId).emit(ACTIONS.CODE_CHANGE, { html, css, js });
+    corsOptions.to(socketId).emit(ACTIONS.CODE_CHANGE, { html, css, js });
   });
 
   socket.on("disconnecting", () => {
@@ -95,7 +110,7 @@ const HOST = "0.0.0.0";
 
 // ✅ Log Railway's public URL instead of local IP
 server.listen(PORT, HOST, () => {
-  console.log(
-    `Server running on: https://pure-courage-production.up.railway.app`
-  );
+  console.log(`Server running on: https://pure-courage-production.up.railway.app`);
 });
+
+
