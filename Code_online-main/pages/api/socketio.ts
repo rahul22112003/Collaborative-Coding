@@ -21,10 +21,10 @@ const ioHandler = (req: any, res: any) => {
   socketio.on("connection", (socket: Socket) => {
     console.log("Socket connected", socket.id);
 
-    socket.on(ACTIONS.JOIN, async ({ roomId , username }) => {
+    socket.on(ACTIONS.JOIN, async ({ roomId, username }) => {
       userSocketmap[socket.id] = username;
       // console.log("user SocketMap", userSocketmap);
-     socket.join("room");
+      socket.join("room");
       // console.log("Data ", roomId, username);
       const clients = getAllConnectedClients(socketio, "room");
       console.log(clients);

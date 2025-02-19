@@ -41,16 +41,7 @@ const Home: NextPage = () => {
         </div>
       </div>
 
-      {/* <footer className="fixed bottom-2">
-              {" "}
-        <a
-          className="text-primary ml-2 font-bold"
-          href="https://instagram.com"
-        >
-          {" "}
-          Vikram and Tushar
-        </a>
-      </footer> */}
+
     </div>
   );
 };

@@ -1,15 +1,13 @@
-import toast from 'react-hot-toast';
-import { io, ManagerOptions, Socket, SocketOptions } from 'socket.io-client';
+import toast from "react-hot-toast";
+import { io, ManagerOptions, Socket, SocketOptions } from "socket.io-client";
 
 export const initSocket = async () => {
-    const option: Partial<ManagerOptions & SocketOptions> = {
-        forceNew: true,
-        reconnectionAttempts: 10000,
-        timeout: 10000,
-        transports: ['websocket'],
-    };
+  const option: Partial<ManagerOptions & SocketOptions> = {
+    forceNew: true,
+    reconnectionAttempts: 10000,
+    timeout: 10000,
+    transports: ["websocket"],
+  };
 
-    return io("wss://pure-courage-production.up.railway.app", option);
+  return io("https://pure-courage-production.up.railway.app", option);
 };
-
-
