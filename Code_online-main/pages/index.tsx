@@ -7,7 +7,7 @@ import Navbar from "../components/Navbar";
 
 const Home: NextPage = () => {
   return (
-    <div className="flex flex-col space-y-10 bg-gradient-to-b from-purple-500 via-blue-500 to-black min-h-screen text-white justify-center items-center">
+    <div className="flex flex-col space-y-10 bg-gradient-to-r from-cyan-400 to-blue-700 min-h-screen text-white justify-center items-center">
       <Head>
         <title>COLLABORATIVE CODING PLATFORM</title>
         <meta

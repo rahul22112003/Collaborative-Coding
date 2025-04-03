@@ -16,7 +16,7 @@ import { initSocket } from "../../helpers/socket";
 import { ACTIONS } from "../../helpers/SocketActions";
 import Peer, { MediaConnection } from "peerjs";
 
-interface EditorProps {}
+interface EditorProps { }
 
 const EditorContainer: React.FC<EditorProps> = () => {
   // Code editor states
@@ -314,95 +314,88 @@ const EditorContainer: React.FC<EditorProps> = () => {
   };
 
   return (
-    <div className="flex flex-col space-y-10 bg-gradient-to-b from-purple-500 via-blue-500 to-black min-h-screen text-white justify-center items-center">
+    <div className="flex flex-col bg-gradient-to-b from-cyan-400 via-blue-400 to-indigo-800 min-h-screen text-white">
       <Head>
         <title>Editor | Code Here</title>
       </Head>
-      <div className="flex-1 grid grid-cols-editor">
-        {/* Sidebar */}
-        <div className="flex flex-col h-screen justify-between">
-          <div className="flex-col">
-            <div className="flex items-center px-4 w-full h-32">
-              <Image width={50} height={50} src="/logo-white.png" alt="Logo" />
-              <h1 className="font-extrabold text-2xl">Code Here</h1>
-            </div>
-            <hr />
-            <div className="flex-col my-4 w-full">
-              {Object.keys(dummyFilesData).map((keyName) => {
-                const fileData =
-                  dummyFilesData[keyName as keyof typeof dummyFilesData];
-                return (
-                  <div
-                    key={fileData.name}
-                    onClick={() =>
-                      setActiveFile(
-                        fileData.name as keyof typeof dummyFilesData
-                      )
-                    }
-                    className={
-                      fileData.name === activeFile
-                        ? fileNameBarClasses + " bg-purple"
-                        : fileNameBarClasses
-                    }
-                  >
-                    <Image
-                      width="20px"
-                      height="20px"
-                      src={fileData.iconName}
-                      alt={fileData.name}
-                    />
-                    <p className="mx-4">{fileData.name}</p>
-                  </div>
-                );
-              })}
-            </div>
-            <h3 className="mx-3 text-lg font-semibold mb-2">Connected</h3>
-            <div className="px-2 w-full flex flex-wrap">
-              {clientList.map((client: any) => (
-                <ClientAvatar key={client.socketId} username={client.username} />
-              ))}
-            </div>
-            <button
-              onClick={toggleMute}
-              className="p-2 bg-blue-500 text-white rounded"
-            >
-              {isMuted ? "Unmute" : "Mute"}
-            </button>
-          </div>
-          <div className="mx-3">
-            <button
-              onClick={copyRoomId}
-              className="w-full rounded-xl p-3 mb-2 font-bold bg-white text-black"
-            >
-              Copy ROOM ID
-            </button>
-            <button
-              onClick={leaveRoom}
-              className="w-full rounded-xl p-3 mb-2 font-bold bg-primary text-black"
-            >
-              Leave
-            </button>
-          </div>
+
+      {/* Top Section: Logo and Title */}
+      <div className="flex flex-col items-center w-full py-4">
+        <div className="flex items-center space-x-2">
+          <Image width={50} height={50} src="/logo-white.png" alt="Logo" />
+          <h1 className="font-extrabold text-3xl">Code Here</h1>
         </div>
-        {/* Main editor & preview */}
-        <div style={{ height: "98vh" }} className="grid grid-cols-2">
+        <hr className="w-full border-white mt-2" />
+      </div>
+
+      {/* Programming Languages Section */}
+      <div className="flex gap-4 justify-center py-4 w-full px-8">
+        {Object.keys(dummyFilesData).map((keyName) => {
+          const fileData = dummyFilesData[keyName as keyof typeof dummyFilesData];
+          return (
+            <div
+              key={fileData.name}
+              onClick={() => setActiveFile(fileData.name as keyof typeof dummyFilesData)}
+              className={`cursor-pointer flex flex-col justify-center items-center w-32 h-20 rounded-md ${fileData.name === activeFile ? "bg-purple-600" : "bg-gray-800"
+                }`}
+            >
+              <Image width="30" height="20px" src={fileData.iconName} alt={fileData.name} />
+              <p className="text-center">{fileData.name}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Main Section: Editor & Console (Fixed Height) */}
+      <div className="grid grid-cols-2 gap-2 w-full px-4 relative" style={{ height: "50vh" }}>
+        {/* Editor Component */}
+        <div className="w-full h-full overflow-hidden">
           <EditorComponent
             onClickFunc={changeCode}
-            onChange={(value) =>
-              ChangeCodeByFileName(activeFile, value as string)
-            }
+            onChange={(value) => ChangeCodeByFileName(activeFile, value as string)}
             code={getCodeByFileName(activeFile)}
             language={dummyFilesData[activeFile]?.language}
           />
-          <div className="grid grid-rows-[75vh_55px]">
-            <iframe srcDoc={srcDoc} className="flex w-full h-full bg-white" />
-            <div className="bg-bgdark">
-              <ConsoleSection />
-            </div>
+        </div>
+
+        {/* Console Section */}
+        <div className="flex flex-col w-full h-full overflow-hidden">
+          <iframe srcDoc={srcDoc} className="w-full h-3/4 bg-white" />
+          <div className="h-1/4 bg-bgdark">
+            <ConsoleSection />
           </div>
         </div>
       </div>
+
+      {/* Footer Section (Always Below) */}
+      <div className="flex flex-col justify-center items-center space-x-4 py-6 relative">
+        {/* Connected People */}
+        <div className="flex flex-col items-center">
+          <h3 className="mx-3 text-lg font-semibold">Connected</h3>
+          <div className="flex flex-wrap">
+            {clientList.map((client: any) => (
+              <ClientAvatar key={client.socketId} username={client.username} />
+            ))}
+          </div>
+        </div>
+
+        <div className="flex space-x-5">
+          {/* Mute/Unmute*/}
+          <button onClick={toggleMute} className="w-32 p-3 bg-blue-500 text-white rounded">
+            {isMuted ? "Unmute" : "Mute"}
+          </button>
+          {/* Copy room id */}
+          <button onClick={copyRoomId} className="w-34 p-3 bg-white text-black rounded">
+            Copy ROOM ID
+          </button>
+          {/* Leave button */}
+          <button onClick={leaveRoom} className="w-32 p-3 bg-red-500 text-white rounded">
+            Leave
+          </button>
+        </div>
+      </div>
     </div>
+
   );
 };
 

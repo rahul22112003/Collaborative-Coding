@@ -112,7 +112,7 @@ function getAllConnectedClients(roomId: string) {
 }
 
 // Start the server (using Railway's PORT if available)
-const PORT = Number(process.env.PORT) || 5000;
+const PORT = Number(process.env.PORT) || 5001;
 const HOST = "0.0.0.0";
 
 server.listen(PORT, HOST, () => {
