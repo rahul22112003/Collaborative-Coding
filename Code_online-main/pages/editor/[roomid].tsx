@@ -15,6 +15,7 @@ import { dummyFilesData } from "../../helpers/data";
 import { initSocket } from "../../helpers/socket";
 import { ACTIONS } from "../../helpers/SocketActions";
 import Peer, { MediaConnection } from "peerjs";
+import axios from "axios";
 
 interface EditorProps { }
 
@@ -23,6 +24,7 @@ const EditorContainer: React.FC<EditorProps> = () => {
   const [html, setHtml] = useState("<h1>Hello World</h1>");
   const [css, setCss] = useState("");
   const [js, setJs] = useState("console.log('Hello world')");
+  const [codeErr,setCodeErr] = useState({html_errors:[],css_errors:[],js_errors:[]})
   const [srcDoc, setSrcDoc] = useState("");
 
   // Connected clients state
@@ -58,6 +60,8 @@ const EditorContainer: React.FC<EditorProps> = () => {
     audio.controls = true; // Show controls for debugging
     document.body.appendChild(audio);
   };
+
+  
 
   useEffect(() => {
     // Request microphone access
@@ -165,6 +169,40 @@ const EditorContainer: React.FC<EditorProps> = () => {
       // router.push("/");
     }, 4000);
   }
+
+  
+  const timeoutRef = useRef(null); // ✅ Store timeout reference
+
+  useEffect(() => {
+    const formdata = new FormData();
+    formdata.append("html", html);
+    formdata.append("css", css);
+    formdata.append("js", js);
+
+    const codeCheck = async () => {
+      try {
+        const response = await axios.post("http://localhost:8000/validate/", formdata, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        setCodeErr(response?.data);
+      } catch (error) {
+        console.error("API error:", error);
+      }
+    };
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(codeCheck, 3000);
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [html, css, js]); 
 
   // Copy room ID to clipboard
   async function copyRoomId() {
@@ -363,6 +401,23 @@ const EditorContainer: React.FC<EditorProps> = () => {
           <iframe srcDoc={srcDoc} className="w-full h-3/4 bg-white" />
           <div className="h-1/4 bg-bgdark">
             <ConsoleSection />
+          </div>
+          <div className="compiler-cls-custom">
+            {
+              codeErr?.html_errors?.map((err)=>{
+                return <p>HTML Error: {err}</p>
+              })
+            }
+            {
+              codeErr?.css_errors?.map((err)=>{
+                return <p>CSS Error: {err}</p>
+              })
+            }
+            {
+              codeErr?.js_errors?.map((err)=>{
+                return <p>JS Error: {err}</p>
+              })
+            }
           </div>
         </div>
       </div>
