@@ -171,7 +171,7 @@ const EditorContainer: React.FC<EditorProps> = () => {
   }
 
   
-  const timeoutRef = useRef(null); // ✅ Store timeout reference
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null); // ✅ Store timeout reference
 
   useEffect(() => {
     const formdata = new FormData();
